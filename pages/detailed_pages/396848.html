@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <link rel="stylesheet" type="text/css" href="/3rdParty/bootstrap/css/bootstrap.min.css" />
+<link rel="stylesheet" type="text/css" href="/3rdParty/bootstrap-slider/css/bootstrap-slider.css" />
+<link rel="stylesheet" type="text/css" href="/3rdParty/typeahead/css/typeahead.css" />
+<link rel="stylesheet" type="text/css" href="/3rdParty/fontawesome/css/all.min.css" />
+<link rel="stylesheet" type="text/css" href="/css/tender.public.css" />
+<script type="text/javascript" src="/assets/456bcc1/JsTrans.js"></script>
+<script type="text/javascript" src="/assets/456bcc1/JsTrans.dictionary.2cb0046138.js"></script>
+<script type="text/javascript" src="/3rdParty/jquery/jquery-3.6.0.min.js"></script>
+<script type="text/javascript" src="/3rdParty/popper/popper.min.js"></script>
+<script type="text/javascript" src="/3rdParty/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="/3rdParty/bootstrap-slider/js/bootstrap-slider.js"></script>
+<script type="text/javascript" src="/3rdParty/typeahead/js/typeahead.js"></script>
+<script type="text/javascript" src="/3rdParty/jscookie/js.cookie.js"></script>
+<script type="text/javascript" src="/js/tender.public.js"></script>
+<script type="text/javascript" src="/assets/e3150d/jquery.yii.js"></script>
+<title>iTWO tender - RIB e-Vergabe und Aufträge für Bieter</title>
+    <meta name="keywords" lang="de" content="eVergabe, elektronische Vergabe, e-Vergabe, Vergabe, Ausschreibungen, Aufträge, Bieter" />
+    <meta name="description" lang="de" content="iTWO tender ist die zentrale Auftragsplattform für Bieter im Internet. Hier finden Sie bundesweit Ausschreibungen zu Bau- und Liefer- und Dienstleistungen von öffentlichen und privaten Auftraggebern." />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+    <meta name="msapplication-config" content="none" />
+
+    <link rel="apple-touch-icon"            href="/img/favicons/apple-touch-icon.png"   sizes="180x180" type="image/png">
+    <link rel="icon"                        href="/img/favicons/favicon-32x32.png"      sizes="32x32"   type="image/png">
+    <link rel="icon"                        href="/img/favicons/favicon-16x16.png"      sizes="16x16"   type="image/png">
+    <link rel="manifest"                    href="/img/favicons/site.webmanifest">
+    <link rel="shortcut icon"               href="/img/favicons/favicon.ico">
+    <meta name="msapplication-TileColor"    content="#ffffff">
+    <meta name="msapplication-config"       content="/img/favicons/browserconfig.xml">
+    <meta name="theme-color"                content="#ffffff">
+
+    <noscript><meta http-equiv="refresh" content="0;url=/noscript"></noscript>
+    
+    <script type="text/javascript">
+        const YII_LANGUAGE      = 'en';
+        const YII_BASE_URL      = '';
+        const YII_CSRF_TOKEN    = '5047adf4b3108c6a903f59669d2a601f3c22a3fd';
+        $(function(){
+            $.initEvents();
+
+            // check for modern browser (html5, no IE)
+            if( (!$.isCanvasSupported() || !!document.documentMode) && Cookies.get('Browser') != 'ignore') {
+                document.getElementById('oldBrowserDialog').style.display = 'block';
+            }
+        });
+    </script>
+    <style>
+        .sps--blw {
+            top:                0;
+            padding-top:        0px;
+            position:           fixed;
+            margin:             10 auto;
+            padding:            0;
+            max-width:          1000px;
+            z-index:            500;
+            background-color:   #fafafa;
+            color:              #000;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+        <!-- navigation -->
+        <div class="sps" id="publicNav">
+            <nav class="navbar navbar-expand-lg navbar-light bg-light" >
+                <div class="navbar-brand">
+                    <img src="/img/logo-rib.png" width="30" height="30" alt="">
+                    iTWO tender                </div>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarContent">
+                    <ul class="navbar-nav mr-auto" id="yw0">
+<li class="nav-item"><a class="nav-link" href="/public/informations">Information</a></li>
+<li class="nav-item"><a class="nav-link" href="/public/publications">Publications</a></li>
+<li class="nav-item"><a class="nav-link" href="/public/registerCompany">Registration</a></li>
+<li class="nav-item"><a class="nav-link" href="/dashboard/index">Login</a></li>
+</ul>                </div>
+
+            </nav>
+        </div>
+                <!-- content -->
+        <div style="min-height: 484px;">
+            
+<style>
+    .headline {
+        font-size:26px;
+        font-weight: bold;
+        color:#212529;
+        letter-spacing:-0.3px;
+    }
+    .text {
+        font-size:16px;
+        font-weight: normal;
+        color:#212529;
+    }
+</style>
+<script>
+    $(function(){
+        $('#TenderSearchForm_radius').slider()
+            .on('slide', function(o){
+                $('#TenderSearchForm_radius_output').html(o.value + ' km');
+            });
+
+        var places = new Bloodhound({
+            datumTokenizer: function(datum) {
+                return Bloodhound.tokenizers.whitespace(datum.value);
+            },
+            queryTokenizer: Bloodhound.tokenizers.whitespace,
+            remote: {
+                wildcard: '%QUERY',
+                url: '/public/typeahead?query=%QUERY',
+                transform: function(response) {
+                    // Map the remote source JSON array to a JavaScript object array
+                    return $.map(response.places, function(place) {
+                        return {
+                            value: place.valueOf()
+                        };
+                    });
+                }
+            }
+        });
+
+        // Instantiate the Typeahead UI
+        $('#TenderSearchForm_location').typeahead(null, {
+            display: 'value',
+            source: places
+        });
+    });
+</script>
+<div class="row"><div class="col-md-4">
+<form id="TenderSearchForm" action="/public/publications" method="post">
+<input type="hidden" value="5047adf4b3108c6a903f59669d2a601f3c22a3fd" name="YII_CSRF_TOKEN" />    <div class="mb-3">
+        <label class="form-label" for="TenderSearchForm_keyword">Search term(s)</label>        <input placeholder="e.g. plumbing, civil engineering, etc." autocomplete="off" class="form-control" name="TenderSearchForm[keyword]" id="TenderSearchForm_keyword" type="text" />            </div>
+
+    <div class="mb-3">
+        <label class="form-label" for="TenderSearchForm_location">Where</label>        <input placeholder="Post Code or City" autocomplete="off" class="form-control" name="TenderSearchForm[location]" id="TenderSearchForm_location" type="text" />            </div>
+
+    <div class="mb-3">
+        <label class="form-label" for="TenderSearchForm_radius">Area&nbsp;<span id="TenderSearchForm_radius_output">30 km</span></label>        <input value="30" data-bs-slider-value="30" data-bs-slider-min="10" data-bs-slider-max="100" data-bs-slider-step="10" name="TenderSearchForm[radius]" id="TenderSearchForm_radius" type="text" />    </div>
+
+<input class="btn btn-primary float-end" type="submit" name="yt0" value="Search" /></form>
+</div><div class="col-md-8"><div class="headline">Announcement not found</div><hr /><div class="text">The desired announcement is no longer publicly available. Maybe you saved the link as a bookmark or found it on one of the social media platforms.</div><div class="text" style="margin-top:12px; margin-bottom:12px;">Each tender has a period in which it is publicly available. You recognize this by the information for the application period or the application deadline. In the following sample view, both details are colored red.</div><div class="text" style="margin-top:12px; margin-bottom:12px;">You can use the search form in the left pane to search for further tenders.</div>
+<ul class="stream">
+    <li id="248766">
+        <div class="item">
+            <div class="item-left info ">
+                <img class="logo float-start" src="/img/platforms/rib-32x32.png" alt="">
+                <div style="overflow: hidden; height:20px;"><strong>08-15 Demo Project</strong></div>
+                <div class="text-muted" style="overflow: hidden; height:20px;">Sample client</div>
+
+                <div class="row" style="margin-top: 16px;">
+                    <div class="col-md-7">
+                        <div class="info-label" style="color:red;">Application period</div>
+                        <div style="color:red;">
+                            15.08.2019 bis 13.09.2020 10:00 Uhr
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="info-label" style="color:red;">Application deadline</div>
+                        <div style="color:red;">
+                            13.09.2020 10:00 Uhr
+                        </div>
+                    </div>
+                </div>
+                <div class="row" style="margin-top: 10px;">
+                    <div class="col-md-7">
+                        <div class="info-label">Period</div>
+                        <div>
+                            nicht angegeben
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="info-label">Execution place</div>
+                        <div>
+                            Berlin
+                        </div>
+                    </div>
+                </div>
+                <div class="row" style="margin-top: 12px;">
+                    <div class="col-md-12" style="min-height: 0;">
+                        <span class="info-actions">
+                            <a  style="white-space:nowrap;" href="#"><i class="fas fa-search"></i>Details</a>                        </span>
+                        <span class="info-actions more">
+                            <a target="_parent" style="white-space:nowrap;" href="#"><i class="fas fa-pencil-alt"></i>Apply</a>                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="item-right meta ">
+                <div class="date">15</div>
+                <div class="month">August</div>
+                <div class="divider"></div>
+                <img src="/img/icon-bookmark-white-24x24.png" style="margin-top: 12px;">
+                <br>
+                <a href="#">
+                    <img src="/img/icon-share-white_24x24.png" style="margin-top: 12px;">
+                </a>
+            </div>
+        </div>
+    </li>
+</ul>
+</div></div>        </div>
+
+        <!-- footer -->
+        <hr>
+        <div class="row footer">
+            <div class="col-md-3">
+                <ul class="nav flex-column">
+                    <li class="nav-header">iTWO tender</li>
+                    <li class="nav-item">
+                        <a href="/">About iTWO tender</a>                    </li>
+                </ul>
+            </div>
+            <div class="col-md-3">
+                <ul class="nav flex-column">
+                    <li class="nav-header">General</li>
+                    <li class="nav-item"><a href="/impressum">Imprint</a></li>
+                    <li class="nav-item"><a href="/datenschutz">Privacy Policy</a></li>
+                    <li class="nav-item"><a target="_blank" href="/docs/iTWOTenderTermsAndConditions.pdf">Terms and Conditions</a></li>
+                </ul>
+            </div>
+            <div class="col-md-3">
+                <ul class="nav flex-column">
+                    <li class="nav-header">Contact & Help</li>
+                    <li class="nav-item"><a href="/kontakt">Contact</a></li>
+                    <li class="nav-item"><a target="blank" href="https://www.meinauftrag.rib.de/hilfe/index.html">Help</a></li>
+                </ul>
+            </div>
+            <div class="col-md-3">
+                <ul class="nav flex-column">
+                    <li class="nav-header">Languages</li>
+                    <li class="nav-item"><a href="/" id="yt1">Deutsch</a></li>
+                    <li class="nav-item"><a href="/" id="yt2">English</a></li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+
+
+<div id="oldBrowserDialog" style="display: none; position: fixed; top: 0; left: 0; z-index: 1050; width: 100vw; height: 100vh; background: rgb(125, 125, 125); background: rgba(0, 0, 0, .8);&quot;"><div style="background: rgb(255, 255, 255); width: 600px; margin: 100px auto; padding: 20px; border-radius: 4px;"><div class="row"><div class="col-12">Dear iTWO tender user, <br><br>You are using an outdated browser that does not correctly display all the contents of iTWO tender. In order to make full use of our pages in appearance and function, we recommend that you install one of the newer browsers below:</div></div><div class="row mt-4"><div class="col-3 text-center"><a href="https://www.google.de/chrome/browser/desktop/"><img src="/img/browser/chrome.png" alt="" /><br>Chrome</a></div><div class="col-3 text-center"><a href="https://www.mozilla.com/firefox/"><img src="/img/browser/ff.png" alt="" /><br>Firefox</a></div><div class="col-3 text-center"><a href="https://www.opera.com/download/"><img src="/img/browser/opera.png" alt="" /><br>Opera</a></div><div class="col-3 text-center"></div></div><div class="row mt-4"><div class="col-12 text-center"><input onclick="Cookies.set(&#039;Browser&#039;, &#039;ignore&#039;, {path: &#039;/&#039;, expires: 1}); document.getElementById(&#039;oldBrowserDialog&#039;).style.display = &#039;none&#039;;" class="btn btn-primary" name="yt3" type="button" value="seen" /></div></div></div></div><div id="cookieBanner" class="cookie-banner" style="display: none;">
+    <p>
+        We use cookies to provide our services and to optimize them for you and to continuously improve them. You can find more information about cookies in our <a href="/datenschutz#cookies">data protection declaration</a>.    </p>
+    <span class="switch switch-sm">
+        <input id="ciNecessary" type="checkbox" class="switch" checked disabled>
+        <label for="ciNecessary" title="Without these cookies, important functions cannot be provided.">
+            Necessary        </label>
+    </span>
+    <span class="switch switch-sm">
+        <input id="ciPreferences" type="checkbox" class="switch">
+        <label for="ciPreferences" title="Allow a web page to remember information, such as your preferred language.">
+            Personalization        </label>
+    </span>
+    <span class="switch switch-sm">
+        <input id="ciStatistics" type="checkbox" class="switch">
+        <label for="ciStatistics" title="Help us understand how our visitors interact with our services.">
+            Statistics        </label>
+    </span>
+    <span class="switch switch-sm">
+        <input id="ciMarketing" type="checkbox" class="switch">
+        <label for="ciMarketing" title="Are used to follow visitors on our website. The goal is, for example, to show ads that are really relevant and appealing to you and therefore more valuable for advertising partners.">
+            Marketing (needed for maps and help videos)         </label>
+    </span>
+    <button id="cookieSel" class="btn btn-sm btn-secondary" style="margin: 0 5px 0 50px;">Allow selection</button>
+    <button id="cookieAll" class="btn btn-sm btn-primary">Allow all cookies </button>
+</div>
+
+<div id="cookieWarning" class="cookie-banner" style="display: none;">
+    In order to be able to use our services, cookies must be activated in your browser!</div>
+
+<script>
+    let cookieName      = 'CookieConsent';
+    let cookieOptions   = { path: '/', expires: 365, secure: true, sameSite: 'None' };
+    let cookieConsent   = { necessary: true, preferences: false, statistics: false, marketing: false };
+
+    // Falls Cookie nicht gesetzt
+    if (Cookies.get(cookieName) === undefined) {
+        // Setze Cookie auf 'enabled'
+        Cookies.set(cookieName, 'enabled', cookieOptions);
+        // Ist Cookie nicht gesetzt, dann werden Cookies scheinbar blockiert
+        if (Cookies.get(cookieName) === undefined) {
+            $('#cookieWarning').show();
+        }
+    }
+
+    // Falls Cookie auf 'enabled'
+    if (Cookies.get(cookieName) === 'enabled') {
+        // Blende Cookie Banner ein
+        $('#cookieBanner').show();
+    } else {
+        // Lese Cookie-Zustimmungen aus
+        $.extend(cookieConsent, JSON.parse(Cookies.get(cookieName)));
+    }
+
+    $('#cookieSel').click(function () {
+        $.extend(cookieConsent, {
+            necessary:      $('#ciNecessary').prop('checked'),
+            preferences:    $('#ciPreferences').prop('checked'),
+            statistics:     $('#ciStatistics').prop('checked'),
+            marketing:      $('#ciMarketing').prop('checked')
+        });
+        Cookies.set(cookieName, JSON.stringify(cookieConsent), cookieOptions);
+        $('#cookieBanner').hide();
+        location.reload();
+    });
+
+    $('#cookieAll').click(function () {
+        $.extend(cookieConsent, {
+            necessary:      true,
+            preferences:    true,
+            statistics:     true,
+            marketing:      true
+        });
+        Cookies.set(cookieName, JSON.stringify(cookieConsent), cookieOptions);
+        $('#cookieBanner').hide();
+        location.reload();
+    });
+
+    showCookieBanner = function(){
+        $('#ciNecessary')   .prop('checked', cookieConsent.necessary);
+        $('#ciPreferences') .prop('checked', cookieConsent.preferences)
+        $('#ciStatistics')  .prop('checked', cookieConsent.statistics)
+        $('#ciMarketing')   .prop('checked', cookieConsent.marketing)
+        $('#cookieBanner')  .show();
+    }
+</script>
+<script type="text/javascript">
+/*<![CDATA[*/
+jQuery(function($) {
+jQuery('body').on('click','#yt1',function(){jQuery.yii.submitForm(this,'',{'language':'de','YII_CSRF_TOKEN':'5047adf4b3108c6a903f59669d2a601f3c22a3fd'});return false;});
+jQuery('body').on('click','#yt2',function(){jQuery.yii.submitForm(this,'',{'language':'en','YII_CSRF_TOKEN':'5047adf4b3108c6a903f59669d2a601f3c22a3fd'});return false;});
+});
+/*]]>*/
+</script>
+</body>
+</html>

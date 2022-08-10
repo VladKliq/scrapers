@@ -2,6 +2,10 @@ from urllib2 import urlopen
 from selenium import webdriver
 import csv
 import time
+import sys
+
+reload(sys)
+sys.setdefaultencoding('utf-8')
 
 
 class BaseScraper:

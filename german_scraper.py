@@ -69,7 +69,6 @@ class Scraper(BaseScraper):
             day = item_index_right_div.find('div', {'class': 'date'}).text
             return '{0}. {1}. {2}'.format(day, month, year)
 
-
         def get_brief_description(item_tender_details):
             div = item_tender_details.find('div', {'class': 'col-md-12'})
             assert div.find('legend').text == 'Brief Description'
@@ -77,6 +76,17 @@ class Scraper(BaseScraper):
             assert len(tds) == 1
             description = _remove_spaces(tds[0].text.strip())
             return description
+
+        def get_files_json(html):
+            files = []
+            soup = BeautifulSoup(html, "lxml")
+            html_files = soup.find_all('div', {'class': 'treegrid_cell'})
+            for file_html in html_files:
+                files.append({
+                    'url': file_html.find('a')['href'],
+                    'filename': file_html.find('a').text,
+                })
+            return files
 
         def _get_index_cols(item_index_cols):
             index_cols = {
@@ -211,9 +221,9 @@ class Scraper(BaseScraper):
         index_soup = BeautifulSoup(index_page_html, "lxml")
         elements_to_parse = index_soup.find_all('ul', {'class': 'stream'})[0].find_all('li')
 
-        for index, element_to_parse in enumerate(elements_to_parse):
+        for index, element_to_parse in enumerate(elements_to_parse[0:10]):
             try:
-                print()
+                print('________________________')
                 print('{0} of {1}'.format(index+1, len(elements_to_parse)))
                 item_index_div = element_to_parse.find('div', {'class': 'item'})
                 item_index_left_div = item_index_div.find('div', {'class': 'item-left'})
@@ -223,7 +233,7 @@ class Scraper(BaseScraper):
 
                 item_id = get_item_id(item_index_left_div)
                 index_name=get_index_name(item_index_left_div)
-                print(item_id)
+                # print(item_id)
                 print(index_name)
                 item_detailed_page_html = self.get_detailed_item_page_html(item_id=item_id)
                 item_detailed_soup = BeautifulSoup(item_detailed_page_html, "lxml")
@@ -310,7 +320,6 @@ class Scraper(BaseScraper):
         dt = datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
         self.write_items_to_csv_file(
             items=items,
-            # fieldnames=Item.get_fielnames(),
             csv_filename=self.CSV_RESULT_FILENAME % dt,
             fieldnames=['item_id',
                         'index_name',
